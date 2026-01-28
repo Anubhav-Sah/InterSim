@@ -9,7 +9,7 @@ export default function LandingPage() {
       <header className="border-b">
         <div className="max-w-6xl mx-auto h-16 px-4 flex items-center justify-between">
           <h1 className="text-xl font-bold">InternSim</h1>
-          
+
           <Link href="/login" className="underline">
             <Button variant="outline">Login</Button>
           </Link>
@@ -22,15 +22,14 @@ export default function LandingPage() {
           AI Internship Simulator
         </h2>
         <p className="text-muted-foreground max-w-2xl mx-auto mb-10">
-          Practice real internship tasks, get AI-powered feedback,
-          and track your progress like a real intern.
+          Practice real internship tasks, get AI-powered feedback, and track
+          your progress like a real intern.
         </p>
 
         <div className="flex justify-center gap-4">
-          <Button size="lg">Get Started</Button>
-          <Button size="lg" variant="outline">
-            View Demo
-          </Button>
+          <Link href="/login" className="underline">
+            <Button size="lg">Get Started</Button>
+          </Link>
         </div>
       </section>
 
