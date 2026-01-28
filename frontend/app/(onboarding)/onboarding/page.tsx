@@ -16,13 +16,12 @@ export default function OnboardingPage() {
 
   // Step control
   const [step, setStep] = useState(1);
-  const totalSteps = 4;
+  const totalSteps = 3;
 
   // Form state
   const [college, setCollege] = useState("");
   const [course, setCourse] = useState("");
   const [semester, setSemester] = useState("");
-  const [skills, setSkills] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -31,7 +30,6 @@ export default function OnboardingPage() {
     if (step === 1) return college.trim() !== "";
     if (step === 2) return course.trim() !== "";
     if (step === 3) return semester.trim() !== "";
-    if (step === 4) return skills.trim() !== "";
     return false;
   }
 
@@ -46,7 +44,7 @@ export default function OnboardingPage() {
           college,
           course,
           semester,
-          skills: skills.split(",").map((s) => s.trim()),
+          onboardingCompleted: true, // ✅ IMPORTANT
         }),
       });
 
@@ -111,9 +109,7 @@ export default function OnboardingPage() {
             {/* STEP 2 */}
             {step === 2 && (
               <div className="space-y-2">
-                <label className="text-sm font-medium">
-                  Course / Degree
-                </label>
+                <label className="text-sm font-medium">Course / Degree</label>
                 <Input
                   placeholder="e.g. B.Tech Computer Science"
                   value={course}
@@ -125,31 +121,12 @@ export default function OnboardingPage() {
             {/* STEP 3 */}
             {step === 3 && (
               <div className="space-y-2">
-                <label className="text-sm font-medium">
-                  Current Semester
-                </label>
+                <label className="text-sm font-medium">Current Semester</label>
                 <Input
                   placeholder="e.g. 5th Semester"
                   value={semester}
                   onChange={(e) => setSemester(e.target.value)}
                 />
-              </div>
-            )}
-
-            {/* STEP 4 */}
-            {step === 4 && (
-              <div className="space-y-2">
-                <label className="text-sm font-medium">
-                  Skills
-                </label>
-                <Input
-                  placeholder="e.g. HTML, CSS, JavaScript, React"
-                  value={skills}
-                  onChange={(e) => setSkills(e.target.value)}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Separate skills using commas
-                </p>
               </div>
             )}
 
@@ -169,15 +146,8 @@ export default function OnboardingPage() {
                 Back
               </Button>
 
-              <Button
-                disabled={!isStepValid() || loading}
-                onClick={handleNext}
-              >
-                {loading
-                  ? "Saving..."
-                  : step < totalSteps
-                  ? "Next"
-                  : "Finish"}
+              <Button disabled={!isStepValid() || loading} onClick={handleNext}>
+                {loading ? "Saving..." : step < totalSteps ? "Next" : "Finish"}
               </Button>
             </div>
           </CardContent>
