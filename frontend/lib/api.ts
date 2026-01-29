@@ -1,3 +1,5 @@
+// frontend/lib/api.ts
+
 function getTokenFromCookie(): string | null {
   if (typeof document === "undefined") return null;
 
@@ -5,25 +7,32 @@ function getTokenFromCookie(): string | null {
   return match ? match[2] : null;
 }
 
+type ApiError = {
+  message: string;
+  status?: number;
+};
+
 export async function apiFetch<T>(
   url: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
 ): Promise<T> {
-  try {
-    const token = getTokenFromCookie();
+  const token = getTokenFromCookie();
 
+  try {
     const res = await fetch(url, {
       ...options,
       headers: {
         "Content-Type": "application/json",
-        ...(token && { Authorization: `Bearer ${token}` }),
+        ...(token && {
+          Authorization: `Bearer ${token}`,
+        }),
         ...options.headers,
       },
-      credentials: "include",
     });
 
-    // 🔐 401 handling
+    // 🔐 UNAUTHORIZED
     if (res.status === 401) {
+      // clear auth
       document.cookie = "token=; Max-Age=0; path=/";
 
       if (
@@ -34,9 +43,13 @@ export async function apiFetch<T>(
         window.location.href = "/login";
       }
 
-      throw new Error("Unauthorized");
+      throw {
+        message: "Session expired. Please login again.",
+        status: 401,
+      } as ApiError;
     }
 
+    // ❌ OTHER SERVER ERRORS
     if (!res.ok) {
       let message = "Something went wrong. Please try again.";
 
@@ -45,15 +58,18 @@ export async function apiFetch<T>(
         if (data?.message) message = data.message;
       } catch {}
 
-      throw new Error(message);
+      throw { message, status: res.status } as ApiError;
     }
 
+    // ✅ SUCCESS
     return res.json();
-  } catch (error) {
-    if (error instanceof Error) throw error;
+  } catch (error: unknown) {
+    if (typeof error === "object" && error !== null && "status" in error) {
+      throw error as ApiError;
+    }
 
-    throw new Error(
-      "Unable to connect to server. Please try again later."
-    );
+    throw {
+      message: "Unable to connect to server. Please try again later.",
+    } as ApiError;
   }
 }

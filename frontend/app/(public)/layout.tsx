@@ -1,6 +1,12 @@
+import { type Metadata } from 'next'
 type Props = {
   children: React.ReactNode;
 };
+
+export const metadata: Metadata = {
+  title: 'InterSim- Auth',
+  description: 'Internship Simulation',
+}
 
 export default function PublicLayout({ children }: Props) {
   return (

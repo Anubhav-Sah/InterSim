@@ -8,9 +8,9 @@ export default function AppLayout({ children }: Props) {
   return (
     <div className="min-h-screen flex bg-gray-100">
       {/* Sidebar */}
-      <aside className="w-64 bg-white border-r p-4">
+      {/* <aside className="w-64 bg-white border-r p-4">
         Sidebar
-      </aside>
+      </aside> */}
 
       {/* Main */}
       <div className="flex-1 flex flex-col">

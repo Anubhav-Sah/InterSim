@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Container from "@/components/layout/container";
 import Section from "@/components/layout/section";
@@ -14,6 +14,9 @@ import { API_BASE_URL } from "@/lib/config";
 export default function OnboardingPage() {
   const router = useRouter();
 
+  // 🔒 Access control state
+  const [checking, setChecking] = useState(true);
+
   // Step control
   const [step, setStep] = useState(1);
   const totalSteps = 3;
@@ -24,6 +27,33 @@ export default function OnboardingPage() {
   const [semester, setSemester] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // 🔐 HARD GUARD: block onboarding if already completed
+  useEffect(() => {
+    async function checkOnboardingStatus() {
+      try {
+        const user = await apiFetch<{
+          onboardingCompleted: boolean;
+        }>(`${API_BASE_URL}/users/me`);
+
+        if (user.onboardingCompleted) {
+          router.replace("/dashboard");
+          return;
+        }
+      } catch {
+        // auth handled globally
+      } finally {
+        setChecking(false);
+      }
+    }
+
+    checkOnboardingStatus();
+  }, [router]);
+
+  // ⛔ Do NOT render page until check finishes
+  if (checking) {
+    return null; // or a spinner later
+  }
 
   // Validation per step
   function isStepValid() {
@@ -44,7 +74,7 @@ export default function OnboardingPage() {
           college,
           course,
           semester,
-          onboardingCompleted: true, // ✅ IMPORTANT
+          onboardingCompleted: true,
         }),
       });
 
@@ -92,38 +122,36 @@ export default function OnboardingPage() {
 
         <Card className="max-w-xl mx-auto">
           <CardContent className="p-6 space-y-6">
-            {/* STEP 1 */}
             {step === 1 && (
               <div className="space-y-2">
                 <label className="text-sm font-medium">
                   College / University
                 </label>
                 <Input
-                  placeholder="e.g. ABC Institute of Technology"
                   value={college}
                   onChange={(e) => setCollege(e.target.value)}
                 />
               </div>
             )}
 
-            {/* STEP 2 */}
             {step === 2 && (
               <div className="space-y-2">
-                <label className="text-sm font-medium">Course / Degree</label>
+                <label className="text-sm font-medium">
+                  Course / Degree
+                </label>
                 <Input
-                  placeholder="e.g. B.Tech Computer Science"
                   value={course}
                   onChange={(e) => setCourse(e.target.value)}
                 />
               </div>
             )}
 
-            {/* STEP 3 */}
             {step === 3 && (
               <div className="space-y-2">
-                <label className="text-sm font-medium">Current Semester</label>
+                <label className="text-sm font-medium">
+                  Current Semester
+                </label>
                 <Input
-                  placeholder="e.g. 5th Semester"
                   value={semester}
                   onChange={(e) => setSemester(e.target.value)}
                 />
@@ -136,7 +164,6 @@ export default function OnboardingPage() {
               </div>
             )}
 
-            {/* ACTION BUTTONS */}
             <div className="flex justify-between pt-4">
               <Button
                 variant="outline"
@@ -146,8 +173,15 @@ export default function OnboardingPage() {
                 Back
               </Button>
 
-              <Button disabled={!isStepValid() || loading} onClick={handleNext}>
-                {loading ? "Saving..." : step < totalSteps ? "Next" : "Finish"}
+              <Button
+                disabled={!isStepValid() || loading}
+                onClick={handleNext}
+              >
+                {loading
+                  ? "Saving..."
+                  : step < totalSteps
+                  ? "Next"
+                  : "Finish"}
               </Button>
             </div>
           </CardContent>
